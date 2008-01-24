@@ -1,0 +1,14 @@
+config/database.yml
+*~
+*.cache
+.DS_Store
+doc/api
+doc/app
+doc/**/*.html
+doc/*.html
+doc/rcov
+db/schema.rb
+*.tmproj
+.tm_last_run_ruby*
+.local_configuration
+\#*
