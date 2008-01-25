@@ -1,0 +1,10 @@
+Story: User logging in
+
+  As a user
+  I want to login with my details
+  So that I can get access to the site
+
+  Scenario: Non existing step
+
+    Given a sentence that is not defined as a step yet
+    Then the story runner should show the previous step as pending
