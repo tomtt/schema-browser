@@ -1,8 +1,7 @@
 SchemaBrowser
 =============
 
-Introduction goes here.
-
+This plugin will allow the database structure and model relations to be viewed in a graphical interface. The interface used is http://ondras.zarovi.cz/sql/
 
 Example
 =======
@@ -10,4 +9,4 @@ Example
 Example goes here.
 
 
-Copyright (c) 2008 [name of plugin creator], released under the MIT license
+Copyright (c) 2008 [Tom ten Thij], released under the MIT license
