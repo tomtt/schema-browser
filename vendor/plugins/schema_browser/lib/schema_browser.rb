@@ -1,6 +1,6 @@
 class SchemaBrowser
   class << self
-    def do_dump
+    def database_tables_to_xml
       s = "<?xml version=\"1.0\" ?>\n"
       xm = Builder::XmlMarkup.new(:target => s, :indent => 2)
       xm.sql {
