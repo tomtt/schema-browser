@@ -9,12 +9,13 @@ class CreateUsers < ActiveRecord::Migration
       t.column :updated_at,                :datetime
       t.column :remember_token,            :string
       t.column :remember_token_expires_at, :datetime
-      
-      
     end
+
+    add_index :users, :login
   end
 
   def self.down
+    remove_index :users, :login
     drop_table "users"
   end
 end
