@@ -1,32 +1,61 @@
+# monkey patch xml builder to allow a type tag
+# module Builder
+#   class XmlBase
+#     # Override Object.type to allow type tags
+#     def type(*args, &block)
+#       method_missing(:type, args, block)
+#     end
+#   end
+# end
+
 class SchemaBrowser
   class << self
     def database_tables_to_xml
+      conn = ActiveRecord::Base.connection
       s = "<?xml version=\"1.0\" ?>\n"
       xm = Builder::XmlMarkup.new(:target => s, :indent => 2)
       xm.sql {
-        tables = ActiveRecord::Base.connection.tables.sort
+        tables = conn.tables.sort
         tables.each_with_index do |table, i|
-          dump_table(table, i, xm)
+          dump_table(table, i, conn.indexes(table), xm)
         end
       }
       s
     end
 
-    def dump_table(table_name, index, xml_builder)
-      xml_builder.table("id" => index.to_s,
+    def has_index_for_column?(table_name, indexes, column)
+      # #<struct ActiveRecord::ConnectionAdapters::IndexDefinition table="users", name="index_users_on_login", unique=false, columns=["login"]>
+      indexes.each do |index|
+        return true if index.name == "index_#{table_name}_on_#{column.name}"
+      end
+      false
+    end
+
+    def dump_table(table_name, id, indexes, xml_builder)
+      xml_builder.table("id" => id.to_s,
                         :title => table_name,
                         "x" => "100",
                         "y" => "120") {
         columns = ActiveRecord::Base.connection.columns(table_name)
         columns.each_with_index do |column, i|
-          dump_column(column, i, xml_builder)
+          attributes = {}
+          attributes["pk"] = "pk" if column.primary
+          attributes["index"] = "index" if column.primary ||
+            has_index_for_column?(table_name, indexes, column)
+          dump_column(column, i, xml_builder, attributes)
         end
       }
     end
 
-    def dump_column(column_name, index, xml_builder)
-      xml_builder.row("id" => index) {
-        xml_builder.title(column_name)
+    def dump_column(column, index, xml_builder, options = {})
+      attributes = { "id" => index }.merge(options)
+      xml_builder.row(attributes) {
+        xml_builder.title(column.name)
+        xml_builder.default(column.default)
+        # At some point the line below has blown up due to type being called on
+        # xml_builder. The purpose of the monkey patch at the top of the file
+        # is to prevent this, but the error has since stopped occuring.
+        xml_builder.type(column.type.to_s)
       }
     end
   end
