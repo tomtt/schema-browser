@@ -1,0 +1,2 @@
+class SchemaBrowserController < ApplicationController
+end
