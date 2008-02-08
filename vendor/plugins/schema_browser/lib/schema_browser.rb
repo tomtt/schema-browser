@@ -42,6 +42,10 @@ class SchemaBrowser
           attributes["pk"] = "pk" if column.primary
           attributes["index"] = "index" if column.primary ||
             has_index_for_column?(table_name, indexes, column)
+          # pk and index are not set on the id field in the live database tables
+          # because the value of primary for them is nil. Debugger statement is
+          # here for testing this behaviour
+          # debugger if column.name == "id"
           dump_column(column, i, xml_builder, attributes)
         end
       }
