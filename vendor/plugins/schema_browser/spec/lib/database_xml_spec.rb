@@ -42,6 +42,10 @@ describe SchemaBrowser do
     it "should assign an y position to tables" do
       SchemaBrowser.database_tables_to_xml.should have_tag("table[y]")
     end
+
+    it "should not include the schema_info table" do
+      SchemaBrowser.database_tables_to_xml.should_not have_tag("table[title=?]", "schema_info")
+    end
   end
 
   describe "with columns" do
@@ -124,7 +128,7 @@ describe SchemaBrowser do
       SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
         with_tag("row") do
           with_tag("title", "name")
-          with_tag("type", "string")
+          with_tag("type", "String")
         end
       end
     end
@@ -133,7 +137,7 @@ describe SchemaBrowser do
       SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
         with_tag("row") do
           with_tag("title", "parrot_id")
-          with_tag("type", "integer")
+          with_tag("type", "Integer")
         end
       end
     end
@@ -185,7 +189,7 @@ describe SchemaBrowser do
 
   def stub_tables
     # debugger
-    ActiveRecord::Base.connection.stub!(:tables).and_return(@tables)
+    ActiveRecord::Base.connection.stub!(:tables).and_return(@tables + ["schema_info"])
     # return empty array for indexes method by default
     ActiveRecord::Base.connection.stub!(:indexes).and_return([])
   end

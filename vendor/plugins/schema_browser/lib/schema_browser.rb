@@ -16,6 +16,7 @@ class SchemaBrowser
       xm = Builder::XmlMarkup.new(:target => s, :indent => 2)
       xm.sql {
         tables = conn.tables.sort
+        tables.delete("schema_info")
         tables.each_with_index do |table, i|
           dump_table(table, i, conn.indexes(table), xm)
         end
@@ -59,7 +60,7 @@ class SchemaBrowser
         # At some point the line below has blown up due to type being called on
         # xml_builder. The purpose of the monkey patch at the top of the file
         # is to prevent this, but the error has since stopped occuring.
-        xml_builder.type(column.type.to_s)
+        xml_builder.type(column.type.to_s.capitalize)
       }
     end
   end
