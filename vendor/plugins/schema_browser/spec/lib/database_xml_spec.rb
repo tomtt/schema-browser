@@ -9,18 +9,18 @@ describe SchemaBrowser do
 
   describe "with just empty tables" do
     it "should produce xml with simple instruct" do
-      SchemaBrowser.database_tables_to_xml.split("\n")[0].should ==
+      SchemaBrowser.schema_to_xml.split("\n")[0].should ==
         '<?xml version="1.0" ?>'
     end
 
     it "should have a table tag wrapped in an sql tag" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("sql") do
+      SchemaBrowser.schema_to_xml.should have_tag("sql") do
         with_tag("table")
       end
     end
 
     it "should have table tags for each table" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("sql") do
+      SchemaBrowser.schema_to_xml.should have_tag("sql") do
         @tables.each do |table|
           with_tag("table[title=?]", table)
         end
@@ -28,7 +28,7 @@ describe SchemaBrowser do
     end
 
     it "should assign a unique id to each table" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("sql") do
+      SchemaBrowser.schema_to_xml.should have_tag("sql") do
         @tables.size.times do |i|
           with_tag("table[id=?]", i)
         end
@@ -36,15 +36,15 @@ describe SchemaBrowser do
     end
 
     it "should assign an x position to tables" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[x]")
+      SchemaBrowser.schema_to_xml.should have_tag("table[x]")
     end
 
     it "should assign an y position to tables" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[y]")
+      SchemaBrowser.schema_to_xml.should have_tag("table[y]")
     end
 
     it "should not include the schema_info table" do
-      SchemaBrowser.database_tables_to_xml.should_not have_tag("table[title=?]", "schema_info")
+      SchemaBrowser.schema_to_xml.should_not have_tag("table[title=?]", "schema_info")
     end
   end
 
@@ -54,20 +54,19 @@ describe SchemaBrowser do
       add_mock_column("pirates", "name", :type => :string)
       add_mock_index("pirates", "name")
       add_mock_column("pirates", "quote", :type => :text)
-      add_mock_column("pirates", "parrot_id", :type => :integer)
       add_mock_column("parrots", "id", :primary => true, :type => :integer)
       add_mock_column("parrots", "name", :default => "parrrot", :type => :string)
+      add_mock_column("parrots", "pirate_id", :type => :integer)
     end
 
     it "should add a row tag to a table tag for a database column" do
-      puts SchemaBrowser.database_tables_to_xml
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "pirates") do
         with_tag("row")
       end
     end
 
     it "should assign a unique id to each column" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "pirates") do
         @stubbed_columns["pirates"].size.times do |i|
           with_tag("row[id=?]", i)
         end
@@ -75,7 +74,7 @@ describe SchemaBrowser do
      end
 
     it "should add the name of the column in a title tag" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "pirates") do
         @stubbed_columns["pirates"].each do |col|
           with_tag("row") do
             with_tag("title", col.name)
@@ -85,7 +84,7 @@ describe SchemaBrowser do
     end
 
     it "should set the pk attribute if the column is a primary key" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "pirates") do
         with_tag("row[pk=pk]") do
           with_tag("title", "id")
         end
@@ -93,13 +92,13 @@ describe SchemaBrowser do
     end
 
     it "should not set the pk attribute if the column is not a primary key" do
-      doc = Hpricot.XML(SchemaBrowser.database_tables_to_xml)
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
       name_row = find_row_with_title(doc, "pirates", "name")
       name_row.should_not have_attribute("pk")
     end
 
     it "should add the default value of the column in a default tag" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "parrots") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "parrots") do
         with_tag("row") do
           with_tag("default", "parrrot")
         end
@@ -107,25 +106,25 @@ describe SchemaBrowser do
     end
 
     it "should set the index attribute if the column is a primary key" do
-      doc = Hpricot.XML(SchemaBrowser.database_tables_to_xml)
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
       name_row = find_row_with_title(doc, "pirates", "id")
       name_row.should have_attribute("index")
     end
 
     it "should set the index attribute if the column is indexed" do
-      doc = Hpricot.XML(SchemaBrowser.database_tables_to_xml)
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
       name_row = find_row_with_title(doc, "pirates", "name")
       name_row.should have_attribute("index")
     end
 
     it "should not set the index attribute if the column is not indexed" do
-      doc = Hpricot.XML(SchemaBrowser.database_tables_to_xml)
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
       name_row = find_row_with_title(doc, "pirates", "quote")
       name_row.should_not have_attribute("index")
     end
 
     it "should add the type of the column in a type tag with value string if column is a string" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "pirates") do
         with_tag("row") do
           with_tag("title", "name")
           with_tag("type", "String")
@@ -134,9 +133,9 @@ describe SchemaBrowser do
     end
 
     it "should add the type of the column in a type tag with value integer if column is an integer" do
-      SchemaBrowser.database_tables_to_xml.should have_tag("table[title=?]", "pirates") do
+      SchemaBrowser.schema_to_xml.should have_tag("table[title=?]", "parrots") do
         with_tag("row") do
-          with_tag("title", "parrot_id")
+          with_tag("title", "pirate_id")
           with_tag("type", "Integer")
         end
       end
@@ -177,14 +176,63 @@ describe SchemaBrowser do
       col.stub!(:type).and_return(options[:type])
       col
     end
-  end
 
-  describe "with relations" do
-    it "should generate a relation for each belongs_to model relation"
-    it "should add the id of the table containing the foreign key in a table_1 tag"
-    it "should add the id of the column containing the foreign key in a row_1 tag"
-    it "should add the id of the table referenced by the foreign key in a table_2 tag"
-    it "should add the id of the column referenced by the foreign key in a row_2 tag"
+    describe "with relations" do
+      before(:each) do
+        add_relation("parrot", "pirate")
+      end
+
+      it "should generate a relation for each belongs_to model relation" do
+        puts SchemaBrowser.schema_to_xml
+        SchemaBrowser.schema_to_xml.should have_tag("sql") do
+          with_tag("relation")
+        end
+      end
+
+      it "should add the id of the table containing the foreign key in a table_1 tag" do
+        xml = SchemaBrowser.schema_to_xml
+        doc = Hpricot.XML(xml)
+        expected_table_id = find_id_of_table(doc, "parrots")
+        xml.should have_tag("relation") do
+          with_tag("table_1", expected_table_id)
+        end
+      end
+
+      it "should add the id of the column containing the foreign key in a row_1 tag" do
+        xml = SchemaBrowser.schema_to_xml
+        doc = Hpricot.XML(xml)
+        expected_column_id = find_id_of_table_column(doc, "parrots", "pirate_id")
+        xml.should have_tag("relation") do
+          with_tag("row_1", expected_column_id)
+        end
+      end
+
+      it "should add the id of the table referenced by the foreign key in a table_2 tag" do
+        xml = SchemaBrowser.schema_to_xml
+        doc = Hpricot.XML(xml)
+        expected_table_id = find_id_of_table(doc, "pirates")
+        xml.should have_tag("relation") do
+          with_tag("table_2", expected_table_id)
+        end
+      end
+
+      it "should add the id of the column referenced by the foreign key in a row_2 tag" do
+        xml = SchemaBrowser.schema_to_xml
+        doc = Hpricot.XML(xml)
+        expected_column_id = find_id_of_table_column(doc, "pirates", "id")
+        xml.should have_tag("relation") do
+          with_tag("row_2", expected_column_id)
+        end
+      end
+    end
+
+    def find_id_of_table(hpricot_doc, table)
+      (hpricot_doc/"table[@title=#{table}]").first.get_attribute("id")
+    end
+
+    def find_id_of_table_column(hpricot_doc, table, column)
+      (hpricot_doc/"table[@title=#{table}]"/"row").select { |row| (row/"title").inner_html == column }.first.get_attribute("id")
+    end
   end
 
   def stub_tables
@@ -192,6 +240,21 @@ describe SchemaBrowser do
     ActiveRecord::Base.connection.stub!(:tables).and_return(@tables + ["schema_info"])
     # return empty array for indexes method by default
     ActiveRecord::Base.connection.stub!(:indexes).and_return([])
+
+    @relations ||= {}
+
+    @tables.each do |table|
+      eval "class #{table.classify};end"
+      @relations[table] ||= []
+      table.classify.constantize.stub!(:reflect_on_all_associations).and_return(@relations[table])
+    end
+  end
+
+  def add_relation(model, reference)
+    relation = mock("#{model}_relation")
+    relation.stub!(:name).and_return(reference.to_sym)
+    relation.stub!(:class_name).and_return(reference.camelize)
+    @relations[model.tableize] << relation
   end
 
   def stub_columns

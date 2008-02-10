@@ -1,27 +1,52 @@
-# monkey patch xml builder to allow a type tag
-# module Builder
-#   class XmlBase
-#     # Override Object.type to allow type tags
-#     def type(*args, &block)
-#       method_missing(:type, args, block)
-#     end
-#   end
-# end
-
 class SchemaBrowser
+  @@debug = false
+  def self.debug=(value)
+    @@debug = value
+  end
+
   class << self
-    def database_tables_to_xml
-      conn = ActiveRecord::Base.connection
-      s = "<?xml version=\"1.0\" ?><!-- WWWSQLEditor XML export -->\n"
-      xm = Builder::XmlMarkup.new(:target => s, :indent => 2)
-      xm.sql {
-        tables = conn.tables.sort
-        tables.delete("schema_info")
-        tables.each_with_index do |table, i|
-          dump_table(table, i, conn.indexes(table), xm)
-        end
+    def schema_to_xml
+      connection = ActiveRecord::Base.connection
+      tables = connection.tables.sort
+      tables.delete("schema_info")
+
+      s = "<?xml version=\"1.0\" ?>\n"
+      xml_builder = Builder::XmlMarkup.new(:target => s, :indent => 2)
+      xml_builder.sql {
+        database_tables_to_xml(xml_builder, connection, tables)
+        relations_to_xml(xml_builder, tables)
       }
       s
+    end
+
+    def database_tables_to_xml(xml_builder, connection, tables)
+      @table_ids = {}
+      @column_ids = {}
+      tables.each_with_index do |table, i|
+        @table_ids[table] = i
+        @column_ids[table] = {}
+        dump_table(table, i, connection.indexes(table), xml_builder)
+      end
+    end
+
+    def relations_to_xml(xml_builder, tables)
+      debugger if @@debug
+      tables.each do |table|
+        table.classify.constantize.reflect_on_all_associations(:belongs_to).each do |reflection|
+          relation_to_xml(xml_builder, table, reflection)
+        end
+      end
+    end
+
+    def relation_to_xml(xml_builder, table, reflection)
+      xml_builder.relation {
+        xml_builder.table_1(@table_ids[table])
+        fk_column = "#{reflection.name.to_s}_id"
+        xml_builder.row_1(@column_ids[table][fk_column])
+        referenced_table = reflection.class_name.tableize
+        xml_builder.table_2(@table_ids[referenced_table])
+        xml_builder.row_2(@column_ids[table]["id"])
+      }
     end
 
     def has_index_for_column?(table_name, indexes, column)
@@ -47,6 +72,7 @@ class SchemaBrowser
           # because the value of primary for them is nil. Debugger statement is
           # here for testing this behaviour
           # debugger if column.name == "id"
+          @column_ids[table_name][column.name] = i
           dump_column(column, i, xml_builder, attributes)
         end
       }
@@ -57,89 +83,8 @@ class SchemaBrowser
       xml_builder.row(attributes) {
         xml_builder.title(column.name)
         xml_builder.default(column.default)
-        # At some point the line below has blown up due to type being called on
-        # xml_builder. The purpose of the monkey patch at the top of the file
-        # is to prevent this, but the error has since stopped occuring.
         xml_builder.type(column.type.to_s.capitalize)
       }
     end
   end
 end
-
-# <?xml version="1.0" ?>
-# <!-- WWWSQLEditor XML export -->
-# <sql>
-#   <table id="0" title="czf_smaha" x="100" y="120" >
-#     <row id="0" pk="pk" index="index">
-#       <title>id</title>
-#       <default>0</default>
-#       <type>Integer</type>
-#     </row>
-#     <row id="1" special="32">
-#       <title>jmeno</title>
-#       <default></default>
-#       <type>String</type>
-#     </row>
-#     <row id="2" special="32">
-#       <title>mail</title>
-#       <default></default>
-#       <type>String</type>
-#     </row>
-#   </table>
-#   <table id="1" title="czf_squat" x="450" y="120" >
-#     <row id="0" pk="pk" index="index">
-#       <title>id</title>
-#       <default>0</default>
-#       <type>Integer</type>
-#     </row>
-#     <row id="1" special="128">
-#       <title>adresa</title>
-#       <default></default>
-#       <type>String</type>
-#     </row>
-#     <row id="2">
-#       <title>food_amount</title>
-#       <default>0</default>
-#       <type>Single precision</type>
-#     </row>
-#     <row id="3">
-#       <title>beer_amount</title>
-#       <default>0</default>
-#       <type>Single precision</type>
-#     </row>
-#   </table>
-#   <table id="2" title="obyvatel" x="273" y="334" >
-#     <row id="0" pk="pk" index="index">
-#       <title>id</title>
-#       <default>0</default>
-#       <type>Integer</type>
-#     </row>
-#     <row id="1" fk="fk" index="index">
-#       <title>id_smaha</title>
-#       <default>0</default>
-#       <type>Integer</type>
-#     </row>
-#     <row id="2" fk="fk" index="index">
-#       <title>id_squat</title>
-#       <default>0</default>
-#       <type>Integer</type>
-#     </row>
-#     <row id="3">
-#       <title>najem</title>
-#       <default>0</default>
-#       <type>Single precision</type>
-#     </row>
-#   </table>
-#   <relation>
-#     <table_1>0</table_1>
-#     <row_1>0</row_1>
-#     <table_2>2</table_2>
-#     <row_2>1</row_2>
-#   </relation>
-#   <relation>
-#     <table_1>1</table_1>
-#     <row_1>0</row_1>
-#     <table_2>2</table_2>
-#     <row_2>2</row_2>
-#   </relation>
-# </sql>
