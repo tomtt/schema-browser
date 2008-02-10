@@ -12,7 +12,7 @@ class SchemaBrowser
   class << self
     def database_tables_to_xml
       conn = ActiveRecord::Base.connection
-      s = "<?xml version=\"1.0\" ?>\n"
+      s = "<?xml version=\"1.0\" ?><!-- WWWSQLEditor XML export -->\n"
       xm = Builder::XmlMarkup.new(:target => s, :indent => 2)
       xm.sql {
         tables = conn.tables.sort

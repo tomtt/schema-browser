@@ -454,6 +454,7 @@ function clear_tables() {
 }
 
 function load_from_schema_browser_plugin() {
+
     ajax_command(GET,
                  "/schema_browser/schema",
                  function(){return "";},
@@ -547,7 +548,11 @@ function load(keyword) {
                 add_relation(0,0,2,1);
                 add_relation(1,0,2,2);
         } else {
-                ajax_command(GET,"io.php?import=import&key="+encodeURIComponent(keyword),function(){return "";},import_xml);
-                io_admin._key = keyword;
+            ajax_command(GET,
+                         "/schema_browser/schema",
+                         function(){return "";},
+                         import_xml);
+            // ajax_command(GET,"io.php?import=import&key="+encodeURIComponent(keyword),function(){return "";},import_xml);
+            io_admin._key = keyword;
         }
 }
