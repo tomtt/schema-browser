@@ -26,10 +26,9 @@ describe SchemaBrowser do
     @browser = SchemaBrowser.new
   end
 
-  it "should be able to list all the relations" do
-    debugger
-    a = 3
-  end
+  # TODO: not sure if this may be too hard to test
+  it "should be able to list all the relations"
+  it "should be able to list all the tables"
 
   def stub_tables(tables)
     ActiveRecord::Base.connection.stub!(:tables).and_return(tables + ["schema_info"])
