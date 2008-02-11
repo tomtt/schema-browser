@@ -1,5 +1,5 @@
 class SchemaBrowserController < ApplicationController
-  layout "schema_browser", :except => [:schema, :schema_builder]
+  layout "schema_browser", :except => [:schema]
 
   def schema
     respond_to do |format|
