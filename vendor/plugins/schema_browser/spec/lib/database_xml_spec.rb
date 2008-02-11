@@ -50,11 +50,12 @@ describe SchemaBrowser do
 
   describe "with columns" do
     before(:each) do
-      add_mock_column("pirates", "id", :primary => true, :type => :integer)
+      add_mock_column("pirates", "id", :type => :integer)
       add_mock_column("pirates", "name", :type => :string)
+      add_mock_column("pirates", "no_key_id", :type => :string)
       add_mock_index("pirates", "name")
       add_mock_column("pirates", "quote", :type => :text)
-      add_mock_column("parrots", "id", :primary => true, :type => :integer)
+      add_mock_column("parrots", "id", :type => :integer)
       add_mock_column("parrots", "name", :default => "parrrot", :type => :string)
       add_mock_column("parrots", "pirate_id", :type => :integer)
     end
@@ -95,6 +96,24 @@ describe SchemaBrowser do
       doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
       name_row = find_row_with_title(doc, "pirates", "name")
       name_row.should_not have_attribute("pk")
+    end
+
+    it "should set the fk attribute if the column is an integer with a name ending on _id" do
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
+      name_row = find_row_with_title(doc, "parrots", "pirate_id")
+      name_row.should have_attribute("fk")
+    end
+
+    it "should not set the fk attribute if the column is not an integer" do
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
+      name_row = find_row_with_title(doc, "pirates", "not_key_id")
+      name_row.should_not have_attribute("fk")
+    end
+
+    it "should not set the fk attribute if the column does not end on _id" do
+      doc = Hpricot.XML(SchemaBrowser.schema_to_xml)
+      name_row = find_row_with_title(doc, "pirates", "id")
+      name_row.should_not have_attribute("fk")
     end
 
     it "should add the default value of the column in a default tag" do

@@ -65,8 +65,9 @@ class SchemaBrowser
         columns = ActiveRecord::Base.connection.columns(table_name)
         columns.each_with_index do |column, i|
           attributes = {}
-          attributes["pk"] = "pk" if column.primary
-          attributes["index"] = "index" if column.primary ||
+          attributes["pk"] = "pk" if column_is_primary?(column)
+          attributes["fk"] = "fk" if column_is_foreign_key?(column)
+          attributes["index"] = "index" if column_is_primary?(column) ||
             has_index_for_column?(table_name, indexes, column)
           # pk and index are not set on the id field in the live database tables
           # because the value of primary for them is nil. Debugger statement is
@@ -76,6 +77,14 @@ class SchemaBrowser
           dump_column(column, i, xml_builder, attributes)
         end
       }
+    end
+
+    def column_is_primary?(column)
+      column.name == "id" || column.primary
+    end
+
+    def column_is_foreign_key?(column)
+      column.name =~ /_id$/ && column.type == :integer
     end
 
     def dump_column(column, index, xml_builder, options = {})
