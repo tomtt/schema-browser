@@ -202,7 +202,6 @@ describe SchemaBrowser do
       end
 
       it "should generate a relation for each belongs_to model relation" do
-        puts SchemaBrowser.schema_to_xml
         SchemaBrowser.schema_to_xml.should have_tag("sql") do
           with_tag("relation")
         end
