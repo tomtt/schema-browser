@@ -16,11 +16,16 @@ module SchemaSpecHelper
   end
 
   def add_relation(model, reference)
+    @relations[model.tableize] << create_relation(model, reference)
+  end
+
+  def create_relation(model, reference, options = {})
     relation = mock("#{model}_relation")
     relation.stub!(:name).and_return(reference.to_sym)
     relation.stub!(:class_name).and_return(reference.camelize)
     relation.stub!(:primary_key_name).and_return("#{reference}_id")
-    @relations[model.tableize] << relation
+    relation.stub!(:options).and_return(options)
+    relation
   end
 
   def stub_columns(tables)

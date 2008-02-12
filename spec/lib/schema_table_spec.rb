@@ -126,6 +126,13 @@ describe SchemaTable do
     @relationships_table.primary_key_column.should be_nil
   end
 
+  it "should ignore polymorphic relations" do
+    relation = create_relation("parrot", "pirate", { :polymorphic => true })
+    lambda {
+      @parrots_table.create_relation(relation)
+    }.should_not change(@parrots_table.relations, :size)
+  end
+
   def stub_tables(tables)
     ActiveRecord::Base.connection.stub!(:tables).and_return(tables + ["schema_info"])
     # return empty array for indexes method by default
