@@ -8,7 +8,7 @@ describe SchemaTable do
   # indexes resides. It should be fine to do this only once at the beginning for all
   # specs since the code should only read the schema and leave it alone otherwise.
   before(:all) do
-    tables = %w{ pirates parrots }
+    tables = %w{ pirates parrots relationships}
     stub_tables(tables)
     stub_columns(tables)
 
@@ -20,6 +20,9 @@ describe SchemaTable do
     add_mock_column("parrots", "name", :default => "parrrot", :type => :string)
     add_mock_column("parrots", "pirate_id", :type => :integer)
 
+    add_mock_column("relationships", "one_id", :type => :integer)
+    add_mock_column("relationships", "two_id", :type => :integer)
+
     add_relation("parrot", "pirate")
 
     add_mock_index("pirates", "name")
@@ -29,6 +32,10 @@ describe SchemaTable do
   before(:each) do
     @pirates_table = SchemaTable.new("pirates")
     @parrots_table = SchemaTable.new("parrots")
+    @relationships_table = SchemaTable.new("relationships")
+    @pirates_table.gather_relations
+    @parrots_table.gather_relations
+    @relationships_table.gather_relations
   end
 
   it "should return a column by its name" do
@@ -113,6 +120,10 @@ describe SchemaTable do
 
   it "should return a reflection with the destination_row_id set to the column_id of the primary key of the referenced table when creating a relation" do
     @parrots_table.relations.first.destination_row_id.should == @pirates_table.primary_key_column.column_id
+  end
+
+  it "should return nil for its primary key column if the table has no pk" do
+    @relationships_table.primary_key_column.should be_nil
   end
 
   def stub_tables(tables)

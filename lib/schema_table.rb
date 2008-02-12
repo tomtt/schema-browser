@@ -62,7 +62,9 @@ class SchemaTable
   def set_primary_key
     column_name = my_class.primary_key
     @primary_key_column = column(column_name)
-    @primary_key_column.primary_key = true
+    if @primary_key_column
+      @primary_key_column.primary_key = true
+    end
   end
 
   def get_column_name_from_index_name(index_name)
