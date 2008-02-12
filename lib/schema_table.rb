@@ -20,15 +20,13 @@ class SchemaTable
 
   def attributes
     attr = { "id" => @table_id.to_s,
-             :title => @name,
-             "x" => "100",
-             "y" => "120" }
+             :title => @name }
     attr
   end
 
   def create_relation(reflection)
     referenced_table = @@tables[reflection.class_name.tableize]
-    from_column_name = reflection.primary_key_name
+    from_column_name = reflection.primary_key_name.to_s
     raise "Field '#{from_column_name}' that should reference #{reflection.class_name} is not present in the database" if column(from_column_name).nil?
     column(from_column_name).foreign_key = true
     return if reflection.options[:polymorphic]
@@ -39,6 +37,7 @@ class SchemaTable
   end
 
   def gather_relations
+    return unless instantiated?
     my_class.reflect_on_all_associations(:belongs_to).each do |reflection|
       create_relation(reflection)
     end
@@ -61,6 +60,7 @@ class SchemaTable
   end
 
   def set_primary_key
+    return unless instantiated?
     column_name = my_class.primary_key
     @primary_key_column = column(column_name)
     if @primary_key_column
@@ -75,5 +75,14 @@ class SchemaTable
 
   def my_class
     @name.classify.constantize
+  end
+
+  def instantiated?
+    begin
+      my_class
+    rescue
+      return false
+    end
+    return true
   end
 end

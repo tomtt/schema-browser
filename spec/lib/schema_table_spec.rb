@@ -8,9 +8,9 @@ describe SchemaTable do
   # indexes resides. It should be fine to do this only once at the beginning for all
   # specs since the code should only read the schema and leave it alone otherwise.
   before(:all) do
-    tables = %w{ pirates parrots relationships}
-    stub_tables(tables)
-    stub_columns(tables)
+    @tables = %w{ pirates parrots relationships}
+    stub_tables(@tables)
+    stub_columns(@tables)
 
     add_mock_column("pirates", "id", :type => :integer)
     add_mock_column("pirates", "name", :type => :string)
@@ -59,11 +59,15 @@ describe SchemaTable do
   end
 
   it "should set a value for x in the attributes" do
-    @pirates_table.attributes.should have_key("x")
+    pending "for now not specifying position is actually the better option" do
+      @pirates_table.attributes.should have_key("x")
+    end
   end
 
   it "should set a value for y in the attributes" do
-    @pirates_table.attributes.should have_key("y")
+    pending "for now not specifying position is actually the better option" do
+      @pirates_table.attributes.should have_key("y")
+    end
   end
 
   it "should set its primary key" do
@@ -133,6 +137,40 @@ describe SchemaTable do
     }.should_not change(@parrots_table.relations, :size)
   end
 
+  it "should not generate an error if a primary key name is returned as a symbol" do
+    relation = mock("parrot_relation")
+    relation.stub!(:name).and_return(:pirate)
+    relation.stub!(:class_name).and_return("Pirate")
+    relation.stub!(:primary_key_name).and_return(:pirate_id)
+    relation.stub!(:options).and_return({})
+
+    # relation = create_relation("parrot", "pirate", :primary_key_name => :pirate_id)
+    # relation.stub!(:primary_key_name).and_return(:pirate_id)
+    lambda {
+      @parrots_table.create_relation(relation)
+    }.should_not raise_error
+  end
+
+  it "should not generate an error if a table is not instantiated as a model" do
+    # TODO: this should test gather_relations as well as set_primary_key
+    pending "FIXME: stubbing columns again seems to cancel out existing stubs of it" do
+      table_name = "blubs"
+      # ActiveRecord::Base.connection.stub!(:columns).with(table_name).and_return([])
+      lambda {
+        @uninstantiated_table = SchemaTable.new(table_name)
+      }.should_not raise_error
+    end
+  end
+
+  def stub_table(table_name, instantiate = true)
+    @relations[table_name] ||= []
+    return unless instantiate
+    eval "class #{table_name.classify};end"
+    table_class = table_name.classify.constantize
+    table_class.stub!(:reflect_on_all_associations).and_return(@relations[table_name])
+    table_class.stub!(:primary_key).and_return("id")
+  end
+
   def stub_tables(tables)
     ActiveRecord::Base.connection.stub!(:tables).and_return(tables + ["schema_info"])
     # return empty array for indexes method by default
@@ -141,11 +179,7 @@ describe SchemaTable do
     @relations ||= {}
 
     tables.each do |table|
-      eval "class #{table.classify};end"
-      @relations[table] ||= []
-      table_class = table.classify.constantize
-      table_class.stub!(:reflect_on_all_associations).and_return(@relations[table])
-      table_class.stub!(:primary_key).and_return("id")
+      stub_table(table)
     end
   end
 
