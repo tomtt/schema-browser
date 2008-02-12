@@ -30,6 +30,7 @@ class SchemaTable
     raise "Field '#{from_column_name}' that should reference #{reflection.class_name} is not present in the database" if column(from_column_name).nil?
     column(from_column_name).foreign_key = true
     return if reflection.options[:polymorphic]
+    return if referenced_table.nil? # bail out if referenced table could not be found for other reason
     @relations << SchemaRelation.new(@table_id,
                                      column(from_column_name).column_id,
                                      referenced_table.table_id,
