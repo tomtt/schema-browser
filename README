@@ -22,5 +22,6 @@ Todo
 * Ability to store position of tables in database, stored remotely after drag event in interface
 * Allow name of controller (and schema view) to be specified to generator
 * Disable by default in production mode
+* More support in interface for untangling relations
 
 Copyright (c) 2008 [Tom ten Thij], released under the MIT license
