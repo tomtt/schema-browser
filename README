@@ -1,12 +1,26 @@
 SchemaBrowser
 =============
 
-This plugin will allow the database structure and model relations to be viewed in a graphical interface. The interface used is http://ondras.zarovi.cz/sql/
+This plugin will allow the database structure and model relations to
+be viewed in a graphical interface. The interface used heavily based
+on http://ondras.zarovi.cz/sql/
 
-Example
+Please note that this is just a proof of concept at this stage and
+that it will be in constant state of rewrite over the next few
+weeks. Be prepared for everything changing on a whim.
+
+To install run script/generate schema_browser. This creates a
+controller called schema_browser, views generating the interface and
+the xml representation of the database schema and model relations. It
+also adds routes for this and copies required files to public/
+
+Todo
 =======
-
-Example goes here.
-
+* Support polymorphic relations
+* Modify layout page to be more suited for just browsing the schema
+* Smarter default placement of tables
+* Ability to store position of tables in database, stored remotely after drag event in interface
+* Allow name of controller (and schema view) to be specified to generator
+* Disable by default in production mode
 
 Copyright (c) 2008 [Tom ten Thij], released under the MIT license
