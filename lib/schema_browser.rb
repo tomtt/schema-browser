@@ -6,7 +6,9 @@ class SchemaBrowser
   attr_reader :tables, :relations
 
   def initialize
-    @tables = SchemaBrowser.get_tables_from_connection.map { |table_name| SchemaTable.new(table_name) }
+    @tables = SchemaBrowser.get_tables_from_connection.map do |table_name|
+      SchemaTable.new(table_name)
+    end
     @tables.each do |table|
       table.gather_relations
     end

@@ -26,7 +26,7 @@ describe SchemaTable do
     add_relation("parrot", "pirate")
 
     add_mock_index("pirates", "name")
-
+    add_mock_index("parrots", "non_existing_column") # FIXME: this should be done just in the test that checks for error on non existing column
   end
 
   before(:each) do
@@ -160,6 +160,12 @@ describe SchemaTable do
         @uninstantiated_table = SchemaTable.new(table_name)
       }.should_not raise_error
     end
+  end
+
+  it "should not generate an error if the column inferred from an index does not exist" do
+    lambda {
+      SchemaTable.new("parrots")
+    }.should_not raise_error
   end
 
   def stub_table(table_name, instantiate = true)

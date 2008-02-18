@@ -7,9 +7,9 @@ class SchemaTable
   def initialize(table_name)
     @table_id = get_id
     @name = table_name
-    @columns = ActiveRecord::Base.connection.columns(table_name).map { |c| SchemaColumn.new(c) }
     @relations = []
     @@tables[table_name] = self
+    @columns = ActiveRecord::Base.connection.columns(table_name).map { |c| SchemaColumn.new(c) }
     set_indexes
     set_primary_key
   end
@@ -55,7 +55,9 @@ class SchemaTable
     @indexes.each do |index|
       column_name = get_column_name_from_index_name(index.name)
       if column_name
-        column(column_name).index = true
+        if column(column_name)
+          column(column_name).index = true
+        end
       end
     end
   end
