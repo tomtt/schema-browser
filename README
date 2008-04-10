@@ -2,7 +2,7 @@ SchemaBrowser
 =============
 
 This plugin will allow the database structure and model relations to
-be viewed in a graphical interface. The interface used heavily based
+be viewed in an interactive graphical interface. The interface used heavily based
 on http://ondras.zarovi.cz/sql/
 
 Please note that this is just a proof of concept at this stage and
@@ -27,5 +27,6 @@ Todo
 * Allow different views of the schema (with tables having different properties/positions for each view)
 * Create whitelist and blacklist implementation to determine which table to show
 * Allow table to be collapsed (interface + store in database)
+* Fix issue where some tables do not show PK for their id
 
 Copyright (c) 2008 [Tom ten Thij], released under the MIT license
