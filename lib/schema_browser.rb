@@ -2,6 +2,7 @@ $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 require "schema_browser/rails/reflection"
+require "schema_browser/meta"
 
 module SchemaBrowser
   def self.reload
