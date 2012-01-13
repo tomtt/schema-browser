@@ -9,9 +9,13 @@ module SchemaBrowser
         @model.columns.map { |column| SchemaBrowser::Rails::Column.new(column).to_hash }
       end
 
-      def reflections
+      def reflections(macros = [:belongs_to, :has_many, :has_one, :has_and_belongs_to_many])
         @model.reflections.inject({}) do |hash, (name, reflection)|
-          hash.merge name => SchemaBrowser::Rails::Reflection.new(reflection).to_hash
+          if macros.include?(reflection.macro)
+            hash.merge name => SchemaBrowser::Rails::Reflection.new(reflection).to_hash
+          else
+            hash
+          end
         end
       end
 

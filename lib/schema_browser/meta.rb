@@ -16,7 +16,7 @@ module SchemaBrowser
     end
 
     def self.ruby_source_files
-      Dir.glob(gem_root.join("lib", "**/*.rb"))
+      Dir.glob(gem_root.join("lib", "schema_browser", "**/*.rb"))
     end
   end
 end
