@@ -1,18 +1,18 @@
 module SchemaBrowser
-  module Rails
+  module RailsInspector
     class Model
       def initialize(model)
         @model = model
       end
 
       def columns
-        @model.columns.map { |column| SchemaBrowser::Rails::Column.new(column).to_hash }
+        @model.columns.map { |column| SchemaBrowser::RailsInspector::Column.new(column).to_hash }
       end
 
       def reflections(macros = [:belongs_to, :has_many, :has_one, :has_and_belongs_to_many])
         @model.reflections.inject({}) do |hash, (name, reflection)|
           if macros.include?(reflection.macro)
-            hash.merge name => SchemaBrowser::Rails::Reflection.new(reflection).to_hash
+            hash.merge name => SchemaBrowser::RailsInspector::Reflection.new(reflection).to_hash
           else
             hash
           end

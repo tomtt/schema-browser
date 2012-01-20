@@ -1,5 +1,5 @@
 module SchemaBrowser
-  module Rails
+  module RailsInspector
     class Introspection
       def self.concrete_models
         models.select { |m| !m.abstract_class }

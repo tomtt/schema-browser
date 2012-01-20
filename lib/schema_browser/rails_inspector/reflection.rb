@@ -1,5 +1,5 @@
 module SchemaBrowser
-  module Rails
+  module RailsInspector
     class Reflection
       def initialize(reflection)
         @reflection = reflection

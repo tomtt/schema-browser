@@ -1,5 +1,5 @@
 module SchemaBrowser
-  module Rails
+  module RailsInspector
     class Column
       def initialize(column)
         @column = column
