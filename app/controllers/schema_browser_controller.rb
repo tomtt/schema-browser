@@ -1,3 +1,3 @@
 class SchemaBrowserController < ApplicationController
-  layout nil
+  layout "schema_browser"
 end
