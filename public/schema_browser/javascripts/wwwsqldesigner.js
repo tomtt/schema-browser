@@ -2473,6 +2473,7 @@ SQL.Designer.prototype.getOption = function(name) {
 		case "db": return CONFIG.DEFAULT_DB;
 		case "staticpath": return CONFIG.STATIC_PATH || "";
 		case "xhrpath": return CONFIG.XHR_PATH || "";
+		case "schemabrowserpath": return CONFIG.SCHEMA_BROWSER_PATH || "";
 		case "snap": return 0;
 		case "showsize": return 0;
 		case "showtype": return 0;

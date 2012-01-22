@@ -13,5 +13,6 @@ var CONFIG = {
 	RELATION_COLORS: ["#000", "#800", "#080", "#008", "#088", "#808", "#088"],
 	
 	STATIC_PATH: "/schema_browser/",
-	XHR_PATH: ""
+	XHR_PATH: "",
+	SCHEMA_BROWSER_PATH: "/schema_browser/schema.xml"
 }
