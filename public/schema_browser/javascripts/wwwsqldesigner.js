@@ -1273,7 +1273,7 @@ SQL.IO.prototype.init = function(owner) {
 	this.listresponse = this.bind(this.listresponse);
 	this.importresponse = this.bind(this.importresponse);
 	
-	OZ.Event.add(this.dom.saveload, "click", this.bind(this.click));
+        // OZ.Event.add(this.dom.saveload, "click", this.bind(this.click));
 	OZ.Event.add(this.dom.clientsave, "click", this.bind(this.clientsave));
 	OZ.Event.add(this.dom.clientload, "click", this.bind(this.clientload));
 	OZ.Event.add(this.dom.clientsql, "click", this.bind(this.clientsql));
@@ -1281,9 +1281,20 @@ SQL.IO.prototype.init = function(owner) {
 	OZ.Event.add(this.dom.serversave, "click", this.bind(this.serversave));
 	OZ.Event.add(this.dom.serverload, "click", this.bind(this.serverload));
 	OZ.Event.add(this.dom.serverlist, "click", this.bind(this.serverlist));
-	OZ.Event.add(this.dom.serverimport, "click", this.bind(this.serverimport));
+        // OZ.Event.add(this.dom.serverimport, "click", this.bind(this.serverimport));
+	OZ.Event.add(this.dom.saveload, "click", this.bind(this.schema_browser_load));
 	OZ.Event.add(document, "keydown", this.bind(this.press));
 	this.build();
+}
+
+SQL.IO.prototype.schema_browser_load = function() {
+  context = this;
+  var name = "Schema browser"
+  context._name = name;
+  var url = context.owner.getOption("schemabrowserpath");
+  context.owner.window.showThrobber();
+  context.name = name;
+  OZ.Request(url, context.loadresponse, {xml:true});
 }
 
 SQL.IO.prototype.build = function() {
