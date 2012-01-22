@@ -2411,6 +2411,7 @@ SQL.Designer.prototype.init2 = function() { /* secondary init, after locale & da
 		this.io.serverload(false, keyword);
 	}
 	document.body.style.visibility = "visible";
+        jQuery('#saveload').click(); /* Clicking the saveload button will load the schema_browser tables */
 }
 
 SQL.Designer.prototype.getMaxZ = function() { /* find max zIndex */
