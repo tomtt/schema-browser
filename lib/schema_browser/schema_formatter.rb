@@ -7,6 +7,9 @@ module SchemaBrowser
     end
 
     def to_www_sql_designer_xml
+      @@last_x = 0
+      @@last_y = 0
+
       xml = <<"EOT"
 <?xml version="1.0" encoding="utf-8" ?>
 <sql>
@@ -49,20 +52,14 @@ EOT
 
     def xml_for_tables
       unless @schema[:models].empty?
-        <<EOT
-  <table name="Post">
-    <row name="id" null="1" autoincrement="1">
-      <datatype>INTEGER</datatype>
-      <default>NULL</default></row>
-    <row name="user_id" null="1" autoincrement="0">
-      <datatype>INTEGER</datatype>
-      <default>NULL</default><relation table="User" row="id" />
-    </row>
-    <key type="PRIMARY" name="">
-      <part>id</part>
-    </key>
-  </table>
-  <table name="User">
+        @schema[:models].map { |table, attributes| xml_for_model(table, attributes) }.join("\n") +
+          (1..50).map { |i| xml_for_model(nil, :name => "Dummy #{i}") }.join("\n")
+      end
+    end
+
+    def xml_for_model(table, attributes)
+      xml = <<EOT
+  <table x="#{@@last_x}" y="#{@@last_y}" name="#{attributes[:name].camelize}">
     <row name="id" null="1" autoincrement="1">
       <datatype>INTEGER</datatype>
       <default>NULL</default></row>
@@ -71,7 +68,12 @@ EOT
     </key>
   </table>
 EOT
+      @@last_x += 120
+      if(@@last_x > 1100)
+        @@last_y += 40
+        @@last_x = @@last_y / 2
       end
+      xml
     end
   end
 end
