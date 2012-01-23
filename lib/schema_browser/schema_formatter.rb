@@ -51,15 +51,29 @@ EOT
     private
 
     def xml_for_tables
-      unless @schema[:models].empty?
-        @schema[:models].map { |table, attributes| xml_for_model(table, attributes) }.join("\n") +
-          (1..50).map { |i| xml_for_model(nil, :name => "Dummy #{i}") }.join("\n")
+      @schema.models.map do |model|
+        foreign_key_columns = @schema.columns_referenced_as_foreign_key_in_model(model)
+        relational_columns = Set.new(foreign_key_columns + @model.belongs_to_columns)
+        xml_for_model(model.table_name, relational_columns)
+        # @schema[:models].map { |table, attributes| xml_for_model(table, attributes) }.join("\n") +
+        #   (1..50).map { |i| xml_for_model(nil, :name => "Dummy #{i}") }.join("\n")
       end
     end
 
-    def xml_for_model(table, attributes)
+    def new_offset
+      val = [@@last_x, @@last_y]
+      @@last_x += 120
+      if(@@last_x > 1100)
+        @@last_y += 40
+        @@last_x = @@last_y / 2
+      end
+      val
+    end
+
+    def xml_for_model(table_name, columns)
+      (x_offset, y_offset) = new_offset
       xml = <<EOT
-  <table x="#{@@last_x}" y="#{@@last_y}" name="#{attributes[:name].camelize}">
+  <table x="#{x_offset}" y="#{y_offset}" name="#{attributes[:name].camelize}">
     <row name="id" null="1" autoincrement="1">
       <datatype>INTEGER</datatype>
       <default>NULL</default></row>
@@ -68,11 +82,6 @@ EOT
     </key>
   </table>
 EOT
-      @@last_x += 120
-      if(@@last_x > 1100)
-        @@last_y += 40
-        @@last_x = @@last_y / 2
-      end
       xml
     end
   end
