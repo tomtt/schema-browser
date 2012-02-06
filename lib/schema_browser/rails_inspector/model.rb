@@ -20,7 +20,11 @@ module SchemaBrowser
       end
 
       def table
-        @model.table_name.to_sym
+        table_name.to_sym
+      end
+
+      def table_name
+        @model.table_name
       end
 
       def name
@@ -30,7 +34,8 @@ module SchemaBrowser
       def to_hash
         { :name => name,
           :columns => columns,
-          :reflections => reflections
+          :reflections => reflections,
+          :table_name => table_name
         }
       end
     end

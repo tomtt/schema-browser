@@ -51,12 +51,11 @@ EOT
     private
 
     def xml_for_tables
-      @schema.models.map do |model|
-        foreign_key_columns = @schema.columns_referenced_as_foreign_key_in_model(model)
-        relational_columns = Set.new(foreign_key_columns + @model.belongs_to_columns)
-        xml_for_model(model.table_name, relational_columns)
-        # @schema[:models].map { |table, attributes| xml_for_model(table, attributes) }.join("\n") +
-        #   (1..50).map { |i| xml_for_model(nil, :name => "Dummy #{i}") }.join("\n")
+      @schema.tables.map do |table|
+        foreign_key_columns = @schema.columns_referenced_as_foreign_key_in_table(table)
+        xml_for_table(table, foreign_key_columns, table.belongs_to_columns)
+        # @schema[:tables].map { |table, attributes| xml_for_table(table, attributes) }.join("\n") +
+        #   (1..50).map { |i| xml_for_table(nil, :name => "Dummy #{i}") }.join("\n")
       end
     end
 
@@ -70,17 +69,22 @@ EOT
       val
     end
 
-    def xml_for_model(table_name, columns)
+    def xml_for_table(table, referenced_columns, columns_referencing_other_tables)
       (x_offset, y_offset) = new_offset
       xml = <<EOT
-  <table x="#{x_offset}" y="#{y_offset}" name="#{attributes[:name].camelize}">
-    <row name="id" null="1" autoincrement="1">
-      <datatype>INTEGER</datatype>
-      <default>NULL</default></row>
-    <key type="PRIMARY" name="">
-      <part>id</part>
-    </key>
+  <table x="#{x_offset}" y="#{y_offset}" name="#{table.name}">
+    #{referenced_columns.map { |c| xml_for_column(c) }.join("\n") }
+    #{columns_referencing_other_tables.map { |c| xml_for_column(c) }.join("\n") }
   </table>
+EOT
+      xml
+    end
+
+    def xml_for_column(column)
+      xml = <<EOT
+    <row name="#{column.name}" null="0" autoincrement="0">
+      <datatype>#{column.sql_type}</datatype>
+    </row>
 EOT
       xml
     end
