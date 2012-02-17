@@ -53,6 +53,7 @@ EOT
     def xml_for_tables
       @schema.tables.map do |table|
         table.set_reflections_on_columns!
+        debugger if @schema.columns_referenced_as_foreign_key_in_table(table).include?(nil)
         foreign_key_columns = @schema.columns_referenced_as_foreign_key_in_table(table)
         xml_for_table(table, foreign_key_columns, table.belongs_to_columns)
 
@@ -83,6 +84,7 @@ EOT
     end
 
     def xml_for_column(column)
+      return "" unless column
       relation = if column.has_reflection?
                    "\n      <relation table=\"%s\" row=\"%s\" />" % [column.reflection.table_name,
                                                                      column.reflection.foreign_key_name]

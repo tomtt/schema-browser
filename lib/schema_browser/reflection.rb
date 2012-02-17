@@ -11,7 +11,7 @@ module SchemaBrowser
     end
 
     def column_name
-      data[:association_foreign_key]
+      data[:primary_key_name]
     end
 
     def is_macro?(macro)

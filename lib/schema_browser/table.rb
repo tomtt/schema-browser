@@ -16,6 +16,7 @@ module SchemaBrowser
     def set_reflections_on_columns!
       belongs_to_reflections.each do |reflection|
         column = column_by_name(reflection.column_name)
+        next unless column
         column.reflection = reflection
       end
     end

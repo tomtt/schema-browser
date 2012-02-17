@@ -15,7 +15,7 @@ module SchemaBrowser
       return [] unless @referenced_columns[table.name]
       @referenced_columns[table.name].map do |column_name|
         table.column_by_name(column_name)
-      end
+      end.compact
     end
 
     def table_by_name(name)
@@ -37,7 +37,8 @@ module SchemaBrowser
       @referenced_columns = {}
       tables.each do |table|
         table.belongs_to_reflections.each do |reflection|
-          @referenced_columns[reflection.table_name] ||= []
+          next if reflection.table_name.blank? # Is this wrong?
+          @referenced_columns[reflection.table_name] ||= Set.new
           @referenced_columns[reflection.table_name] << reflection.foreign_key_name
         end
       end
