@@ -10,6 +10,10 @@ module SchemaBrowser
       data[:active_record_primary_key]
     end
 
+    def column_name
+      data[:association_foreign_key]
+    end
+
     def is_macro?(macro)
       data[:macro].to_s == macro.to_s
     end

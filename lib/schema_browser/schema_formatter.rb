@@ -52,8 +52,10 @@ EOT
 
     def xml_for_tables
       @schema.tables.map do |table|
+        table.set_reflections_on_columns!
         foreign_key_columns = @schema.columns_referenced_as_foreign_key_in_table(table)
         xml_for_table(table, foreign_key_columns, table.belongs_to_columns)
+
         # @schema[:tables].map { |table, attributes| xml_for_table(table, attributes) }.join("\n") +
         #   (1..50).map { |i| xml_for_table(nil, :name => "Dummy #{i}") }.join("\n")
       end
@@ -81,9 +83,15 @@ EOT
     end
 
     def xml_for_column(column)
+      relation = if column.has_reflection?
+                   "\n      <relation table=\"%s\" row=\"%s\" />" % [column.reflection.table_name,
+                                                                     column.reflection.foreign_key_name]
+                 else
+                   ""
+                 end
       xml = <<EOT
     <row name="#{column.name}" null="0" autoincrement="0">
-      <datatype>#{column.sql_type}</datatype>
+      <datatype>#{column.sql_type}</datatype>#{relation}
     </row>
 EOT
       xml

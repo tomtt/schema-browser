@@ -7,7 +7,17 @@ module SchemaBrowser
     end
 
     def belongs_to_columns
-      []
+      rfs = belongs_to_reflections
+      rfs.map do |reflection|
+        column_by_name(reflection.data[:primary_key_name])
+      end
+    end
+
+    def set_reflections_on_columns!
+      belongs_to_reflections.each do |reflection|
+        column = column_by_name(reflection.column_name)
+        column.reflection = reflection
+      end
     end
 
     def column_by_name(name)
