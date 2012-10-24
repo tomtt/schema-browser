@@ -26,7 +26,7 @@ class SchemaTable
 
   def create_relation(reflection)
     referenced_table = @@tables[reflection.class_name.tableize]
-    from_column_name = reflection.primary_key_name.to_s
+    from_column_name = reflection.foreign_key.to_s
     raise "Field '#{from_column_name}' that should reference #{reflection.class_name} is not present in the database" if column(from_column_name).nil?
     column(from_column_name).foreign_key = true
     return if reflection.options[:polymorphic]
